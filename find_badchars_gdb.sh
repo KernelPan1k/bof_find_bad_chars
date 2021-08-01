@@ -2,14 +2,18 @@
 
 # x/200xw $esp
 
-file_input="$1"
-file_badchars="$2"
+< "$1" awk -F"\t" '{print $2$3$4$5}' \
+  | sed 's/0x/\n/g' \
+  | sed '/^$/d' \
+  | sed 's/../&:/g;s/:$//' \
+  | awk -F":" '{print $4$3$2$1}' \
+  | tr -d "\n" \
+  | sed 's/../&:/g;s/:$//' \
+  | tr '[:lower:]' '[:upper:]' > /tmp/gdb.txt
 
-the_input="$(cat "$1" | awk -F"\t" '{print $2$3$4$5}' | sed 's/0x/\n/g' | sed '/^$/d' | sed 's/../&:/g;s/:$//' | awk -F":" '{print $4$3$2$1}' | tr -d "\n" | sed 's/../&:/g;s/:$//' | tr '[:lower:]' '[:upper:]')"
-the_badchar="$(cat "$2" | tr -d "\\" | tr -d "x" | sed 's/../&:/g;s/:$//' | tr '[:lower:]' '[:upper:]')"
+< "$2" tr -d "\\" \
+  | tr -d "x" \
+  | sed 's/../&:/g;s/:$//' \
+  | tr '[:lower:]' '[:upper:]' > /tmp/badchar.txt
 
-echo "$the_input" > /tmp/theinput.txt
-echo "$the_badchar" > /tmp/thebadchar.txt
-
-vimdiff /tmp/theinput.txt /tmp/thebadchar.txt
-
+vimdiff /tmp/gdb.txt /tmp/badchar.txt
